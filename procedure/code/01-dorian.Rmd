@@ -86,9 +86,9 @@ repository is set up to ignore the R environment data file.
 ```{r twitter-setup, eval = FALSE}
 # Twitter application values
 twitter_vars <- list(
-  app = "enter Twitter application name",
-  key = "enter Twitter API key",
-  secret = "enter Twitter API secret key"
+  app = "DorianGEOG323sem7",
+  key = "3159UZAWIWJ7s5sRuN2NDZEQt",
+  secret = "0NYi9mPW1SeTVJCrHdmp2eC8XeLo3AoJr3WY6Q7oz6RYpBPNUj"
 )
 
 # if Twitter token has already been created, auto-fill dialogue with its values
@@ -350,7 +350,7 @@ Remove stop words and our search terms.
 # remove urls, fancy formatting, etc. in other words, clean the text content
 dorian_text <- dorian %>%
   select(text) %>%
-  plain_tweets()
+  plain_tweets() #removes non language, part of rtweet package
 
 # parse out words from tweet text
 dorian_words <- dorian_text %>% unnest_tokens(word, text)
@@ -359,7 +359,7 @@ dorian_words <- dorian_text %>% unnest_tokens(word, text)
 word_count <- list(before = count(dorian_words)$n)
 
 # create list of stop words (useless words not worth analyzing)
-data("stop_words")
+data("stop_words") #stop words is from tidytext
 
 # add "t.co" twitter links to the list of stop words
 # also add the twitter search terms to the list
@@ -437,7 +437,7 @@ First, you will need a Census API. You can sign up for one here: https://api.cen
 
 ```{r census-api}
 census_api_key(dlgInput(
-  "Enter a Census API Key",
+  "fd77230520f2fa9bb485f1843f616487875bc4f9",
   Sys.getenv("CENSUS_API_KEY")
 )$res,
 overwrite = TRUE
@@ -656,3 +656,27 @@ ggplot() +
     axis.title.y = element_blank()
   )
 ```
+
+```{r}
+counties <- counties %>%
+  mutate(dorrate_log = log(dorrate))
+```
+
+# our new map: normalized difference
+```{r}
+#people tweeting about hurricane, dorian, sharpiegate more than in nov.
+ggplot() +
+  geom_sf(data = counties, 
+    aes(fill = cut_interval(dorrate_log, 5)), color = "grey", lwd=0.1) +
+  scale_fill_brewer(palette = "GnBu") +
+  guides(fill = guide_legend(title = "Activity Increase")) +
+  labs(title = "Level of Incresed activity of hurricane, dorian, sharpiegate") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank()
+  ) +
+  xlim(-96, -67) +
+  ylim(24, 47)
+```
+
